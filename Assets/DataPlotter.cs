@@ -21,6 +21,9 @@ public class DataPlotter : MonoBehaviour
     public string yName;
     public string zName;
 
+    //Title Text
+    public String titleName;
+
     public float plotScale = 10;
 
     // The prefab for the data points that will be instantiated
@@ -28,6 +31,9 @@ public class DataPlotter : MonoBehaviour
 
     // Object which will contain instantiated prefabs in hiearchy
     public GameObject PointHolder;
+
+    // Object which will contain title in hiearchy
+    public GameObject Title;
 
     // Use this for initialization
     void Start()
@@ -92,9 +98,10 @@ public class DataPlotter : MonoBehaviour
 
             // Assigns original values to dataPointName
             string dataPointName =
-                pointList[i][xName] + " "
-                + pointList[i][yName] + " "
-                + pointList[i][zName];
+                "("+"x:"+
+                pointList[i][xName] + ","
+                + "y:"+pointList[i][yName] + ","
+                + "z:"+pointList[i][zName]+")";
 
             // Assigns name to the prefab
             dataPoint.transform.name = dataPointName;
@@ -104,6 +111,11 @@ public class DataPlotter : MonoBehaviour
                 new Color(x, y, z, 1.0f);
         }
 
+        //set title and position it
+        GameObject title = Instantiate(Title, new Vector3(0, ((yMax-yMin)+1)/ (yMax - yMin), ((zMax -zMin)/2)/ (zMax - zMin)) * plotScale, Quaternion.identity);
+        //add title as child of plot
+        title.transform.parent = PointHolder.transform;
+        title.GetComponent<TextMesh>().text = titleName;
     }
 
     private float FindMaxValue(string columnName)
