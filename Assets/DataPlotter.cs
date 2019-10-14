@@ -116,6 +116,8 @@ public class DataPlotter : MonoBehaviour
         //add title as child of plot
         title.transform.parent = PointHolder.transform;
         title.GetComponent<TextMesh>().text = titleName;
+
+        AddCollider();
     }
 
     private float FindMaxValue(string columnName)
@@ -147,5 +149,10 @@ public class DataPlotter : MonoBehaviour
         }
 
         return minValue;
+    }
+
+    private void AddCollider()
+    {
+        BoxCollider boxCollider = PointHolder.AddComponent<BoxCollider>();
     }
 }
