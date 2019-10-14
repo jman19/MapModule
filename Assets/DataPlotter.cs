@@ -112,7 +112,10 @@ public class DataPlotter : MonoBehaviour
         }
 
         //set title and position it
-        GameObject title = Instantiate(Title, new Vector3(0, ((yMax-yMin)+1)/ (yMax - yMin), ((zMax -zMin)/2)/ (zMax - zMin)) * plotScale, Quaternion.identity);
+        float xMid = FindMeanValue(xName);
+        float zMid = FindMeanValue(zName);
+
+        GameObject title = Instantiate(Title, new Vector3((xMid-xMin)/(xMax-xMin), ((yMax-yMin)+(float)0.5)/ (yMax - yMin), (zMid -zMin)/ (zMax - zMin)) * plotScale, Quaternion.identity);
         //add title as child of plot
         title.transform.parent = PointHolder.transform;
         title.GetComponent<TextMesh>().text = titleName;
@@ -134,6 +137,17 @@ public class DataPlotter : MonoBehaviour
 
         //Spit out the max value
         return maxValue;
+    }
+
+    private float FindMeanValue(string columnName)
+    {
+        float total = 0;
+        //Loop through Dictionary, overwrite existing minValue if new value is smaller
+        for (var i = 0; i < pointList.Count; i++)
+        {
+            total = total+Convert.ToSingle(pointList[i][columnName]);
+        }
+        return total / pointList.Count;
     }
 
     private float FindMinValue(string columnName)
