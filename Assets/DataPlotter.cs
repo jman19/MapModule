@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using Microsoft.MixedReality.Toolkit.UI;
 
 public class DataPlotter : MonoBehaviour
 {
@@ -32,7 +33,7 @@ public class DataPlotter : MonoBehaviour
     // Object which will contain instantiated prefabs in hiearchy
     public GameObject PointHolder;
 
-    // Object which will contain title in hiearchy
+    // Object which will contain text in hiearchy
     public GameObject Title;
 
     // Use this for initialization
@@ -74,17 +75,11 @@ public class DataPlotter : MonoBehaviour
         for (var i = 0; i < pointList.Count; i++)
         {
             // Get value in poinList at ith "row", in "column" Name, normalize
-            float x =
-                (System.Convert.ToSingle(pointList[i][xName]) - xMin)
-                / (xMax - xMin);
+            float x = normalize(System.Convert.ToSingle(pointList[i][xName]), xMax, xMin);
 
-            float y =
-                (System.Convert.ToSingle(pointList[i][yName]) - yMin)
-                / (yMax - yMin);
+            float y = normalize(System.Convert.ToSingle(pointList[i][yName]), yMax, yMin);
 
-            float z =
-                (System.Convert.ToSingle(pointList[i][zName]) - zMin)
-                / (zMax - zMin);
+            float z = normalize(System.Convert.ToSingle(pointList[i][zName]), zMax, zMin);
 
 
             // Instantiate as gameobject variable so that it can be manipulated within loop
@@ -111,16 +106,33 @@ public class DataPlotter : MonoBehaviour
                 new Color(x, y, z, 1.0f);
         }
 
-        //set title and position it
+        //find mean values so we can postion text at center points of generated plot
         float xMid = FindMeanValue(xName);
         float zMid = FindMeanValue(zName);
+        float yMid = FindMeanValue(yName);
 
-        GameObject title = Instantiate(Title, new Vector3((xMid-xMin)/(xMax-xMin), ((yMax-yMin)+(float)0.5)/ (yMax - yMin), (zMid -zMin)/ (zMax - zMin)) * plotScale, Quaternion.identity);
-        //add title as child of plot
+        GameObject title = Instantiate(Title, new Vector3( normalize(xMid,xMax,xMin), normalize((yMax+(float)0.5),yMax,yMin), normalize(zMid,zMax,zMin)) * plotScale, Quaternion.identity);
+        //add title 
         title.transform.parent = PointHolder.transform;
         title.GetComponent<TextMesh>().text = titleName;
+        title.transform.name = "title";
+        //add x label
+        title = Instantiate(Title, new Vector3(normalize(xMid, xMax, xMin), normalize(yMin, yMax, yMin), normalize(zMin, zMax, zMin)) * plotScale, Quaternion.Euler(90,0,0));
+        title.transform.parent = PointHolder.transform;
+        title.GetComponent<TextMesh>().text = "x-Col";
+        title.transform.name = "x-label";
+        //add z label
+        title = Instantiate(Title, new Vector3(normalize(xMin, xMax, xMin), normalize(yMin, yMax, yMin), normalize(zMid, zMax, zMin)) * plotScale, Quaternion.Euler(90, 90, 0));
+        title.transform.parent = PointHolder.transform;
+        title.GetComponent<TextMesh>().text = "z-Col";
+        title.transform.name = "z-label";
+        //add y label
+        title = Instantiate(Title, new Vector3(normalize(xMin, xMax, xMin), normalize(yMid, yMax, yMin), normalize(zMax, zMax, zMin)) * plotScale, Quaternion.Euler(0, 0, 90));
+        title.transform.parent = PointHolder.transform;
+        title.GetComponent<TextMesh>().text = "y-Col";
+        title.transform.name = "y-label";
 
-        AddCollider();
+        InitalizeInteraction(xMax,yMax,zMax,xMin,yMin,zMin);
     }
 
     private float FindMaxValue(string columnName)
@@ -165,8 +177,16 @@ public class DataPlotter : MonoBehaviour
         return minValue;
     }
 
-    private void AddCollider()
+    private float normalize(float value,float max, float min)
+    {
+        return (value - min) / (max - min);
+    }
+
+    private void InitalizeInteraction(float xMax,float yMax,float zMax,float xMin,float yMin, float zMin)
     {
         BoxCollider boxCollider = PointHolder.AddComponent<BoxCollider>();
+        PointHolder.transform.gameObject.GetComponent<BoxCollider>().size = new Vector3(normalize(xMax,xMax,xMin), normalize(yMax, yMax, yMin), normalize(zMax, zMax, zMin));
+        PointHolder.AddComponent<BoundingBox>();
+        PointHolder.AddComponent<ManipulationHandler>();
     }
 }
