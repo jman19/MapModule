@@ -6,21 +6,14 @@ using Microsoft.MixedReality.Toolkit.UI;
 
 public class DataPlotter : MonoBehaviour
 {
-    // Name of the input file, no extension
-    public string inputfile;
-
-    // List for holding data from CSV reader
-    private List<Dictionary<string, object>> pointList;
-
-    // Indices for columns to be assigned
-    public int columnX = 0;
-    public int columnY = 1;
-    public int columnZ = 2;
+    public List<float> Xpoints=new List<float>();
+    public List<float> Ypoints = new List<float>();
+    public List<float> Zpoints = new List<float>();
 
     // Full column names
-    public string xName;
-    public string yName;
-    public string zName;
+    public String xName;
+    public String yName;
+    public String zName;
 
     //Title Text
     public String titleName;
@@ -40,46 +33,33 @@ public class DataPlotter : MonoBehaviour
     void Start()
     {
 
-        // Set pointlist to results of function Reader with argument inputfile
-        pointList = CSVReader.Read(inputfile);
-
-        //Log to console
-        Debug.Log(pointList);
-
-        // Declare list of strings, fill with keys (column names)
-        List<string> columnList = new List<string>(pointList[1].Keys);
-
-        // Print number of keys (using .count)
-        Debug.Log("There are " + columnList.Count + " columns in the CSV");
-
-        foreach (string key in columnList)
-            Debug.Log("Column name is " + key);
-
-        // Assign column name from columnList to Name variables
-        xName = columnList[columnX];
-        yName = columnList[columnY];
-        zName = columnList[columnZ];
-
         // Get maxes of each axis
-        float xMax = FindMaxValue(xName);
-        float yMax = FindMaxValue(yName);
-        float zMax = FindMaxValue(zName);
+        float xMax = FindMaxValue(Xpoints);
+        float yMax = FindMaxValue(Ypoints);
+        float zMax = FindMaxValue(Zpoints);
 
         // Get minimums of each axis
-        float xMin = FindMinValue(xName);
-        float yMin = FindMinValue(yName);
-        float zMin = FindMinValue(zName);
+        float xMin = FindMinValue(Xpoints);
+        float yMin = FindMinValue(Ypoints);
+        float zMin = FindMinValue(Zpoints);
 
+        //find mean values so we can postion text at center points of generated plot
+        float xMid = FindMiddle(xMax, xMin);
+        float zMid = FindMiddle(zMax, zMin);
+        float yMid = FindMiddle(yMax, yMin);
+
+        //center the pivot of object to middle of plot 
+        PointHolder.transform.position = new Vector3(normalize(xMid,xMax,xMin),normalize(yMid,yMax,yMin),normalize(zMid,zMax,zMin))*plotScale;
 
         //Loop through Pointlist
-        for (var i = 0; i < pointList.Count; i++)
+        for (var i = 0; i < Xpoints.Count; i++)
         {
             // Get value in poinList at ith "row", in "column" Name, normalize
-            float x = normalize(System.Convert.ToSingle(pointList[i][xName]), xMax, xMin);
+            float x = normalize(Xpoints[i], xMax, xMin);
 
-            float y = normalize(System.Convert.ToSingle(pointList[i][yName]), yMax, yMin);
+            float y = normalize(Ypoints[i], yMax, yMin);
 
-            float z = normalize(System.Convert.ToSingle(pointList[i][zName]), zMax, zMin);
+            float z = normalize(Zpoints[i], zMax, zMin);
 
 
             // Instantiate as gameobject variable so that it can be manipulated within loop
@@ -94,87 +74,99 @@ public class DataPlotter : MonoBehaviour
             // Assigns original values to dataPointName
             string dataPointName =
                 "("+"x:"+
-                pointList[i][xName] + ","
-                + "y:"+pointList[i][yName] + ","
-                + "z:"+pointList[i][zName]+")";
+                Xpoints[i]+ ","
+                + "y:"+Ypoints[i] + ","
+                + "z:"+Zpoints[i]+")";
 
             // Assigns name to the prefab
             dataPoint.transform.name = dataPointName;
 
+            // Scale dataPoint depending on Plot scale
+            dataPoint.transform.localScale = new Vector3(0.03f, 0.03f, 0.03f) * plotScale;
             // Gets material color and sets it to a new RGB color we define
             dataPoint.GetComponent<Renderer>().material.color =
                 new Color(x, y, z, 1.0f);
         }
-
-        //find mean values so we can postion text at center points of generated plot
-        float xMid = FindMeanValue(xName);
-        float zMid = FindMeanValue(zName);
-        float yMid = FindMeanValue(yName);
 
         GameObject title = Instantiate(Title, new Vector3( normalize(xMid,xMax,xMin), normalize((yMax+(float)0.5),yMax,yMin), normalize(zMid,zMax,zMin)) * plotScale, Quaternion.identity);
         //add title 
         title.transform.parent = PointHolder.transform;
         title.GetComponent<TextMesh>().text = titleName;
         title.transform.name = "title";
+        //scale the size of text depending on PlotScale
+        title.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f)*plotScale;
         //add x label
         title = Instantiate(Title, new Vector3(normalize(xMid, xMax, xMin), normalize(yMin, yMax, yMin), normalize(zMin, zMax, zMin)) * plotScale, Quaternion.Euler(90,0,0));
         title.transform.parent = PointHolder.transform;
-        title.GetComponent<TextMesh>().text = "x-Col";
+        title.GetComponent<TextMesh>().text = xName;
         title.transform.name = "x-label";
+        //scale the size of text depending on PlotScale
+        title.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f)*plotScale;
         //add z label
         title = Instantiate(Title, new Vector3(normalize(xMin, xMax, xMin), normalize(yMin, yMax, yMin), normalize(zMid, zMax, zMin)) * plotScale, Quaternion.Euler(90, 90, 0));
         title.transform.parent = PointHolder.transform;
-        title.GetComponent<TextMesh>().text = "z-Col";
+        title.GetComponent<TextMesh>().text = zName;
         title.transform.name = "z-label";
+        title.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f)*plotScale;
         //add y label
         title = Instantiate(Title, new Vector3(normalize(xMin, xMax, xMin), normalize(yMid, yMax, yMin), normalize(zMax, zMax, zMin)) * plotScale, Quaternion.Euler(0, 0, 90));
         title.transform.parent = PointHolder.transform;
-        title.GetComponent<TextMesh>().text = "y-Col";
+        title.GetComponent<TextMesh>().text = yName;
         title.transform.name = "y-label";
+        //scale the size of text depending on PlotScale
+        title.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f)*plotScale;
 
         InitalizeInteraction(xMax,yMax,zMax,xMin,yMin,zMin);
+
+        //center the plot in middle of the screen
+        PointHolder.transform.position = new Vector3(0, 0, 0);
     }
 
-    private float FindMaxValue(string columnName)
+    private float FindMaxValue(List<float> values)
     {
         //set initial value to first value
-        float maxValue = Convert.ToSingle(pointList[0][columnName]);
+        float maxValue = values[0];
 
-        //Loop through Dictionary, overwrite existing maxValue if new value is larger
-        for (var i = 0; i < pointList.Count; i++)
+        //Loop through, overwrite existing maxValue if new value is larger
+        for (var i = 0; i < values.Count; i++)
         {
-            if (maxValue < Convert.ToSingle(pointList[i][columnName]))
-                maxValue = Convert.ToSingle(pointList[i][columnName]);
+            if (maxValue < values[i])
+                maxValue = values[i];
         }
 
         //Spit out the max value
         return maxValue;
     }
 
-    private float FindMeanValue(string columnName)
-    {
-        float total = 0;
-        //Loop through Dictionary, overwrite existing minValue if new value is smaller
-        for (var i = 0; i < pointList.Count; i++)
-        {
-            total = total+Convert.ToSingle(pointList[i][columnName]);
-        }
-        return total / pointList.Count;
-    }
-
-    private float FindMinValue(string columnName)
+    private float FindMinValue(List<float> values)
     {
 
-        float minValue = Convert.ToSingle(pointList[0][columnName]);
+        float minValue = values[0];
 
-        //Loop through Dictionary, overwrite existing minValue if new value is smaller
-        for (var i = 0; i < pointList.Count; i++)
+        //Loop through, overwrite existing minValue if new value is smaller
+        for (var i = 0; i < values.Count; i++)
         {
-            if (Convert.ToSingle(pointList[i][columnName]) < minValue)
-                minValue = Convert.ToSingle(pointList[i][columnName]);
+            if (values[i] < minValue)
+                minValue = values[i];
         }
 
         return minValue;
+    }
+
+    private float FindMeanValue(List<float> values)
+    {
+        float total = 0;
+        //Loop through, overwrite existing minValue if new value is smaller
+        for (var i = 0; i < values.Count; i++)
+        {
+            total = total + values[i];
+        }
+        return total / values.Count;
+    }
+
+    private float FindMiddle(float max, float min)
+    {
+        return (max + min) / 2;
     }
 
     private float normalize(float value,float max, float min)
@@ -184,8 +176,13 @@ public class DataPlotter : MonoBehaviour
 
     private void InitalizeInteraction(float xMax,float yMax,float zMax,float xMin,float yMin, float zMin)
     {
+        float xMid = FindMiddle(xMax, xMin);
+        float zMid = FindMiddle(zMax, zMin);
+        float yMid = FindMiddle(yMax, yMin);
+
         BoxCollider boxCollider = PointHolder.AddComponent<BoxCollider>();
         PointHolder.transform.gameObject.GetComponent<BoxCollider>().size = new Vector3(normalize(xMax,xMax,xMin), normalize(yMax, yMax, yMin), normalize(zMax, zMax, zMin));
+
         PointHolder.AddComponent<BoundingBox>();
         PointHolder.AddComponent<ManipulationHandler>();
     }
