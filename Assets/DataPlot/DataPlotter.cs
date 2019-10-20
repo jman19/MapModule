@@ -46,8 +46,6 @@ namespace DataVisualization.Plotter
                 twoD = true;
             }
 
-            Debug.Log(Zpoints.Count);
-
             // Get maxes of each axis
             float xMax = FindMaxValue(Xpoints);
             float yMax = FindMaxValue(Ypoints);
