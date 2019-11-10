@@ -101,13 +101,15 @@ namespace DataVisualization.Plotter
                     new Color(x, y, z, 1.0f);
             }
 
-            GameObject title = Instantiate(Text, new Vector3(normalize(xMid, xMax, xMin), normalize((yMax + (float)0.5), yMax, yMin), normalize(zMid, zMax, zMin)) * plotScale, Quaternion.identity);
+            GameObject title = Instantiate(Text, new Vector3(normalize(xMid, xMax, xMin), normalize(yMax, yMax, yMin), normalize(zMid, zMax, zMin)) * plotScale, Quaternion.identity);
             //add title 
             title.transform.parent = PointHolder.transform;
             title.GetComponent<TextMesh>().text = titleName;
             title.transform.name = "title";
             //scale the size of text depending on PlotScale
             title.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f) * plotScale;
+            //place title so it is just above plot
+            title.transform.position = title.transform.position + new Vector3(0,title.GetComponent<Renderer>().bounds.size.y/2, 0);
 
             //add x label
             GameObject xLabel;
