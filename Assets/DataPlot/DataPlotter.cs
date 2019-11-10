@@ -244,12 +244,12 @@ namespace DataVisualization.Plotter
             PointHolder.transform.gameObject.GetComponent<BoxCollider>().size = new Vector3(normalize(xMax, xMax, xMin), normalize(yMax, yMax, yMin), normalize(zMax, zMax, zMin)) * plotScale;
 
             PointHolder.AddComponent<BoundingBox>();
-            PointHolder.GetComponent<BoundingBox>().ShowWireFrame = false;
+            PointHolder.GetComponent<BoundingBox>().WireframeEdgeRadius= PointHolder.GetComponent<BoundingBox>().WireframeEdgeRadius * plotScale;
             PointHolder.AddComponent<ManipulationHandler>();
 
             //scale handle sizes
-            PointHolder.GetComponent<BoundingBox>().ScaleHandleSize=0.06f*plotScale;
-            PointHolder.GetComponent<BoundingBox>().RotationHandleSize=0.06f*plotScale;
+            PointHolder.GetComponent<BoundingBox>().ScaleHandleSize= PointHolder.GetComponent<BoundingBox>().ScaleHandleSize * plotScale;
+            PointHolder.GetComponent<BoundingBox>().RotationHandleSize= PointHolder.GetComponent<BoundingBox>().RotationHandleSize * plotScale;
 
 
             //Optional handle prefab Models
