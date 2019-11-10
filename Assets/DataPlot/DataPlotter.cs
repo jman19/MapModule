@@ -8,28 +8,51 @@ namespace DataVisualization.Plotter
 {
     public class DataPlotter : MonoBehaviour
     {
+        [Tooltip("X values")]
         public List<float> Xpoints = new List<float>();
+        [Tooltip("Y values")]
         public List<float> Ypoints = new List<float>();
+        [Tooltip("Z values leave empty if you want a 2D Plot")]
         public List<float> Zpoints = new List<float>();
 
         // Full column names
+        [Tooltip("X axis label")]
         public String xName;
+        [Tooltip("Y axis label")]
         public String yName;
+        [Tooltip("z axis label")]
         public String zName;
 
         //Title Text
+        [Tooltip("Title of plot")]
         public String titleName;
 
+        [Tooltip("changes size scale of plot ie 1 the plot will be 1 m in size")]
         public float plotScale = 10;
 
         // The prefab for the data points that will be instantiated
+        [Tooltip("The prefab for the data points that will be instantiated")]
         public GameObject PointPrefab;
 
         // Object which will contain instantiated prefabs in hiearchy
+        [Tooltip("Object which will contain instantiated prefabs in hiearchy")]
         public GameObject PointHolder;
 
         // Object which will contain text in hiearchy
+        [Tooltip("Object which will contain text in hiearchy")]
         public GameObject Text;
+
+        [Tooltip("Material applied to handles when they are not in a grabbed state (Optional)")]
+        public Material handleMaterial;
+
+        [Tooltip("Material applied to handles while they are a grabbed (Optional)")]
+        public Material handelGrabbedMaterial;
+
+        [Tooltip("Prefab used to display rotation handles. If not set a sphere will be displayed instead")]
+        public GameObject rotationHandle;
+
+        [Tooltip("Prefab used to display scale handles in corners. If not set, boxes will be displayed instead")]
+        public GameObject scaleHandle;
 
         private Boolean twoD=false;
 
@@ -218,10 +241,22 @@ namespace DataVisualization.Plotter
             float yMid = FindMiddle(yMax, yMin);
 
             BoxCollider boxCollider = PointHolder.AddComponent<BoxCollider>();
-            PointHolder.transform.gameObject.GetComponent<BoxCollider>().size = new Vector3(normalize(xMax, xMax, xMin), normalize(yMax, yMax, yMin), normalize(zMax, zMax, zMin));
+            PointHolder.transform.gameObject.GetComponent<BoxCollider>().size = new Vector3(normalize(xMax, xMax, xMin), normalize(yMax, yMax, yMin), normalize(zMax, zMax, zMin)) * plotScale;
 
             PointHolder.AddComponent<BoundingBox>();
+            PointHolder.GetComponent<BoundingBox>().ShowWireFrame = false;
             PointHolder.AddComponent<ManipulationHandler>();
+
+            //scale handle sizes
+            PointHolder.GetComponent<BoundingBox>().ScaleHandleSize=0.06f*plotScale;
+            PointHolder.GetComponent<BoundingBox>().RotationHandleSize=0.06f*plotScale;
+
+
+            //Optional handle prefab Models
+            PointHolder.GetComponent<BoundingBox>().HandleGrabbedMaterial=handelGrabbedMaterial;
+            PointHolder.GetComponent<BoundingBox>().HandleMaterial= handleMaterial;
+            PointHolder.GetComponent<BoundingBox>().ScaleHandlePrefab=scaleHandle;
+            PointHolder.GetComponent<BoundingBox>().RotationHandleSlatePrefab=rotationHandle;
         }
     }
 }
