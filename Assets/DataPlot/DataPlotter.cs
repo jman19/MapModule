@@ -245,6 +245,7 @@ namespace DataVisualization.Plotter
 
             PointHolder.AddComponent<BoundingBox>();
             PointHolder.GetComponent<BoundingBox>().WireframeEdgeRadius= PointHolder.GetComponent<BoundingBox>().WireframeEdgeRadius * plotScale;
+            PointHolder.GetComponent<BoundingBox>().WireframeMaterial.color = Color.white;
             PointHolder.AddComponent<ManipulationHandler>();
 
             //scale handle sizes
