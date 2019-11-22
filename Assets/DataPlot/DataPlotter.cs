@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;
 using System;
 using Microsoft.MixedReality.Toolkit.UI;
 
@@ -37,6 +38,9 @@ namespace DataVisualization.Plotter
         // Object which will contain instantiated prefabs in hiearchy
         [Tooltip("Object which will contain instantiated prefabs in hiearchy")]
         public GameObject PointHolder;
+
+        [Tooltip("(optional) AppBar which will be used for plot use only the APPBar found in MRTK")]
+        public GameObject appBar;
 
         // Object which will contain text in hiearchy
         [Tooltip("Object which will contain text in hiearchy")]
@@ -258,6 +262,17 @@ namespace DataVisualization.Plotter
             PointHolder.GetComponent<BoundingBox>().HandleMaterial= handleMaterial;
             PointHolder.GetComponent<BoundingBox>().ScaleHandlePrefab=scaleHandle;
             PointHolder.GetComponent<BoundingBox>().RotationHandleSlatePrefab=rotationHandle;
+
+            //Optional add appBar
+            if (appBar != null)
+            {
+                GameObject objectBar = Instantiate(appBar, new Vector3(0, 0, 0), Quaternion.identity);
+                objectBar.transform.parent = PointHolder.transform.parent;
+                objectBar.transform.localScale = new Vector3(2f, 2f, 2f) * plotScale;
+                var so= new SerializedObject(objectBar.GetComponent<AppBar>());
+                so.FindProperty("boundingBox").objectReferenceValue = PointHolder.GetComponent<BoundingBox>();
+                so.ApplyModifiedProperties();
+            }
         }
     }
 }
