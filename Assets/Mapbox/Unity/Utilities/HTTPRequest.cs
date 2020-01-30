@@ -11,20 +11,30 @@ namespace Mapbox.Unity.Utilities
 	using UnityEngine.Networking;
 	using System.Collections;
 	using Mapbox.Platform;
-	using UnityEngine;
+    using UnityEngine;
 
 #if UNITY_EDITOR
-	using UnityEditor;
+    using UnityEditor;
 #endif
 
 	public enum HttpRequestType
 	{
 		Get,
 		Head
-	}
+    }
 
 
-	internal sealed class HTTPRequest : IAsyncRequest
+    // Based on https://www.owasp.org/index.php/Certificate_and_Public_Key_Pinning#.Net
+    //public class AcceptAllCertificatesSignedWithASpecificKeyPublicKey : CertificateHandler
+    //{
+
+    //    protected override bool ValidateCertificate(byte[] certificateData)
+    //    {
+    //        return true;
+    //    }
+    //}
+
+    internal sealed class HTTPRequest : IAsyncRequest
 	{
 
 		private UnityWebRequest _request;
@@ -36,9 +46,9 @@ namespace Mapbox.Unity.Utilities
 
 		public HttpRequestType RequestType { get { return _requestType; } }
 
-		// TODO: simplify timeout for Unity 5.6+
-		// https://docs.unity3d.com/ScriptReference/Networking.UnityWebRequest-timeout.html
-		public HTTPRequest(string url, Action<Response> callback, int timeout, HttpRequestType requestType = HttpRequestType.Get)
+        // TODO: simplify timeout for Unity 5.6+
+        // https://docs.unity3d.com/ScriptReference/Networking.UnityWebRequest-timeout.html
+        public HTTPRequest(string url, Action<Response> callback, int timeout, HttpRequestType requestType = HttpRequestType.Get)
 		{
 			IsCompleted = false;
 			_requestType = requestType;
@@ -58,9 +68,10 @@ namespace Mapbox.Unity.Utilities
 
 			_request.timeout = timeout;
 			_callback = callback;
+            //_request.certificateHandler = new AcceptAllCertificatesSignedWithASpecificKeyPublicKey();
 
 #if UNITY_EDITOR
-			if (!EditorApplication.isPlaying)
+            if (!EditorApplication.isPlaying)
 			{
 				Runnable.EnableRunnableInEditor();
 			}
@@ -94,7 +105,7 @@ namespace Mapbox.Unity.Utilities
 			var response = Response.FromWebResponse(this, _request, null);
 
 			_callback(response);
-			_request.Dispose();
+            _request.Dispose();
 			_request = null;
 			IsCompleted = true;
 		}
