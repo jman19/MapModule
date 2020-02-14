@@ -20,6 +20,8 @@ public class MapPlotter : MonoBehaviour
     public GameObject Text;
     [Tooltip("Title of plot")]
     public string titleName;
+    [Tooltip("enabled 3D terrain default is flat")]
+    public bool enable3DTerrain = false;
     // Start is called before the first frame update
     void Start()
     {
@@ -34,12 +36,18 @@ public class MapPlotter : MonoBehaviour
         layer.SetLayerSource(VectorSourceType.MapboxStreetsWithBuildingIds);
         layer.AddPolygonFeatureSubLayer("buildings", "building");
         layer.FindFeatureSubLayerWithName("buildings").materialOptions.SetStyleType(StyleTypes.Light);
-        ITerrainLayer terrain = MapHolder.GetComponent<AbstractMap>().Terrain;
-        terrain.SetElevationType(ElevationLayerType.LowPolygonTerrain);
-        //terrain.EnableCollider(true);
+        if (enable3DTerrain)
+        {
+            ITerrainLayer terrain = MapHolder.GetComponent<AbstractMap>().Terrain;
+            terrain.SetElevationType(ElevationLayerType.LowPolygonTerrain);
+        }
+
+        MapHolder.GetComponent<AbstractMap>().SetPlacementType(MapPlacementType.AtTileCenter);
         InitalizeInteraction();
 
-        GameObject title = Instantiate(Text, new Vector3(0.4f, 2.5f, -0.345f) * plotScale, Quaternion.identity);
+        GameObject title = Instantiate(Text, new Vector3(-0.2f, 2.5f, -1.3f) * plotScale, Quaternion.identity);
+        //place title so it is just above plot
+        title.transform.position = title.transform.position + new Vector3(0, title.GetComponent<Renderer>().bounds.size.y / 2, 0) * plotScale;
         //add title 
         title.transform.parent = MapHolder.transform;
         title.GetComponent<TextMesh>().text = titleName;
@@ -54,11 +62,9 @@ public class MapPlotter : MonoBehaviour
 
     private void InitalizeInteraction()
     {
-        //center the plot in middle of the screen
-        MapHolder.transform.position = new Vector3(0, 0, 0);
         MapHolder.AddComponent<BoxCollider>();
         MapHolder.transform.gameObject.GetComponent<BoxCollider>().size = new Vector3(3, 2.5f, 3) * plotScale;
-        MapHolder.transform.gameObject.GetComponent<BoxCollider>().center = new Vector3(0.4f, 1.3f, -0.345f) * plotScale;
+        MapHolder.transform.gameObject.GetComponent<BoxCollider>().center = new Vector3(0, 1.25f, 0) * plotScale;
         MapHolder.AddComponent<BoundingBox>();
         MapHolder.GetComponent<BoundingBox>().WireframeMaterial.color = Color.white;
         MapHolder.AddComponent<ManipulationHandler>();
@@ -67,7 +73,5 @@ public class MapPlotter : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        MapOptions options = MapHolder.GetComponent<AbstractMap>().Options;
-        options.locationOptions.zoom = zoom;
     }
 }
