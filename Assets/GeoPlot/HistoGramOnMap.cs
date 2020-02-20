@@ -4,7 +4,6 @@ namespace DataVisualization.Plotter
     using Mapbox.Utils;
 	using Mapbox.Unity.Map;
     using UnityEngine;
-    using Mapbox.Unity.MeshGeneration.Factories;
 	using Mapbox.Unity.Utilities;
 	using System.Collections.Generic;
 
@@ -12,7 +11,6 @@ namespace DataVisualization.Plotter
 	{
         [Tooltip("The map to place the data points on")]
         public AbstractMap map;
-
         [Tooltip("The location to place data points on")]
         [Geocode]
 		public string[] locationStrings;
@@ -35,7 +33,7 @@ namespace DataVisualization.Plotter
 		void Start()
 		{
             //if colors was not set default to white
-            if (colors == null)
+            if (colors == null || colors.Count==0)
             {
                 colors = new List<Color>();
                 for (var i=0; i < heightValues.Count; i++)
@@ -54,13 +52,14 @@ namespace DataVisualization.Plotter
                 var instance = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 instance.GetComponent<Renderer>().material.color = colors[i];
                 instance.transform.localScale = new Vector3(spawnScale, (normalize(heightValues[i],maxHeight,minHeight)* HeightScaleMax)+ HeightScaleMin, spawnScale);
+                //set the parent of the histogram bars to the MapHolder not the map itself since we dont wish for the bars to change scale when altering zoom levels
                 instance.transform.parent = gameObject.transform.parent;
                 instance.transform.localPosition = map.GeoToWorldPosition(_locations[i], true);
 				_spawnedObjects.Add(instance);
 			}
 		}
 
-		private void Update()
+        private void Update()
 		{
             GameObject mapHolder = gameObject.transform.parent.gameObject;
             Vector3 currPos = mapHolder.transform.position;

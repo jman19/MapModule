@@ -8,6 +8,7 @@ namespace DataVisualization.Plotter
 {
     public class mrMap : MonoBehaviour
     {
+        [Header("Mix Reality Map Settings")]
         [Tooltip("Latitude Longitude")]
         [Geocode]
         public string location;
@@ -27,11 +28,14 @@ namespace DataVisualization.Plotter
         public bool enable3DTerrain = false;
 
         //histogram creation settings
+        [Header("Histogram Settings")]
         [Tooltip("The location to place data points on")]
         [Geocode]
         public string[] locationStrings;
         [Tooltip("The location height of each histogram bar")]
         public List<float> heightValues;
+        [Tooltip("The color of each histogram bar (default is white)")]
+        public List<Color> colors;
         [Tooltip("changes size scale of the data points")]
         public float spawnScale = 0.1f;
         [Tooltip("changes max height of the bar")]
@@ -88,6 +92,7 @@ namespace DataVisualization.Plotter
             map.AddComponent<HistoGramOnMap>();
             map.GetComponent<HistoGramOnMap>().locationStrings = locationStrings;
             map.GetComponent<HistoGramOnMap>().heightValues = heightValues;
+            map.GetComponent<HistoGramOnMap>().colors = colors;
             map.GetComponent<HistoGramOnMap>().spawnScale = spawnScale;
             map.GetComponent<HistoGramOnMap>().HeightScaleMax = HeightScaleMax;
             map.GetComponent<HistoGramOnMap>().HeightScaleMin = HeightScaleMin;
@@ -104,7 +109,7 @@ namespace DataVisualization.Plotter
             MapHolder.GetComponent<BoundingBox>().WireframeMaterial.color = Color.white;
             MapHolder.AddComponent<ManipulationHandler>();
         }
-
+       
         // Update is called once per frame
         void Update()
         {
@@ -120,7 +125,6 @@ namespace DataVisualization.Plotter
                 ITerrainLayer terrain = map.GetComponent<AbstractMap>().Terrain;
                 terrain.SetElevationType(ElevationLayerType.FlatTerrain);
             }
-            print(map.GetComponent<AbstractMap>().CenterMercator);
         }
     }
 }
