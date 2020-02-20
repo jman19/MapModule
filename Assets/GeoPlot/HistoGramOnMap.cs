@@ -18,7 +18,9 @@ namespace DataVisualization.Plotter
 		public string[] locationStrings;
         [Tooltip("The location height of each histogram bar")]
         public List<float> heightValues;
-		Vector2d[] _locations;
+        [Tooltip("The color of each histogram bar (default is white)")]
+        public List<Color> colors;
+        Vector2d[] _locations;
 
         [Tooltip("changes size scale of the data points")]
         public float spawnScale = 0.05f;
@@ -32,6 +34,15 @@ namespace DataVisualization.Plotter
         private float minHeight;
 		void Start()
 		{
+            //if colors was not set default to white
+            if (colors == null)
+            {
+                colors = new List<Color>();
+                for (var i=0; i < heightValues.Count; i++)
+                {
+                    colors.Add(Color.white);
+                }
+            }
             maxHeight = FindMaxValue(heightValues);
             minHeight = FindMinValue(heightValues);
             _locations = new Vector2d[locationStrings.Length];
@@ -41,6 +52,7 @@ namespace DataVisualization.Plotter
 				var locationString = locationStrings[i];
 				_locations[i] = Conversions.StringToLatLon(locationString);
                 var instance = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                instance.GetComponent<Renderer>().material.color = colors[i];
                 instance.transform.localScale = new Vector3(spawnScale, (normalize(heightValues[i],maxHeight,minHeight)* HeightScaleMax)+ HeightScaleMin, spawnScale);
                 instance.transform.parent = gameObject.transform.parent;
                 instance.transform.localPosition = map.GeoToWorldPosition(_locations[i], true);
