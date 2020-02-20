@@ -21,7 +21,7 @@ namespace DataVisualization.Plotter
         Vector2d[] _locations;
 
         [Tooltip("changes size scale of the data points")]
-        public float spawnScale = 0.05f;
+        public float spawnScale = 0.015f;
         [Tooltip("changes max height of the bar")]
         public float HeightScaleMax = 0.95f;
         [Tooltip("changes min height of the bar")]
@@ -41,8 +41,11 @@ namespace DataVisualization.Plotter
                     colors.Add(Color.white);
                 }
             }
-            maxHeight = FindMaxValue(heightValues);
-            minHeight = FindMinValue(heightValues);
+            if(heightValues!=null && heightValues.Count > 0)
+            {
+                maxHeight = FindMaxValue(heightValues);
+                minHeight = FindMinValue(heightValues);
+            }
             _locations = new Vector2d[locationStrings.Length];
 			_spawnedObjects = new List<GameObject>();
 			for (int i = 0; i < locationStrings.Length; i++)
@@ -61,37 +64,48 @@ namespace DataVisualization.Plotter
 
         private void Update()
 		{
-            GameObject mapHolder = gameObject.transform.parent.gameObject;
-            Vector3 currPos = mapHolder.transform.position;
-            Vector3 currScale = mapHolder.transform.localScale;
-            Quaternion rot = mapHolder.transform.rotation;
-
-            mapHolder.transform.position=new Vector3(0, 0, 0);
-            mapHolder.transform.localScale = new Vector3(1, 1, 1);
-            mapHolder.transform.rotation = Quaternion.identity;
-            int count = _spawnedObjects.Count;
-			for (int i = 0; i < count; i++)
-			{
-				var spawnedObject = _spawnedObjects[i];
-				var location = _locations[i];
-                spawnedObject.transform.localPosition = map.GeoToWorldPosition(location, true);
-				spawnedObject.transform.localScale = new Vector3(spawnScale, (normalize(heightValues[i], maxHeight, minHeight) * HeightScaleMax)+ HeightScaleMin, spawnScale);
-                //postion the histogram bar above map
-                spawnedObject.transform.localPosition = new Vector3(spawnedObject.transform.position.x, spawnedObject.transform.position.y+spawnedObject.transform.localScale.y/2, spawnedObject.transform.position.z);
-                //if the histogram bar appears outside the bounds due to zoom level hide them
-                if (!mapHolder.GetComponent<BoxCollider>().bounds.Contains(spawnedObject.transform.position))
+            if (_spawnedObjects!=null && _spawnedObjects.Count > 0)
+            {
+                GameObject mapHolder = gameObject.transform.parent.gameObject;
+                Vector3 currPos = mapHolder.transform.position;
+                Vector3 currScale = mapHolder.transform.localScale;
+                Quaternion rot = mapHolder.transform.rotation;
+                //reset the plot and scale to origin to do geographical calculations as the API expects the map to be centred at world pos (0,0,0) and scale to be (1,1,1)
+                mapHolder.transform.position = new Vector3(0, 0, 0);
+                mapHolder.transform.localScale = new Vector3(1, 1, 1);
+                mapHolder.transform.rotation = Quaternion.identity;
+                int count = _spawnedObjects.Count;
+                for (int i = 0; i < count; i++)
                 {
-                    spawnedObject.SetActive(false);
+                    var spawnedObject = _spawnedObjects[i];
+                    var location = _locations[i];
+                    spawnedObject.transform.localPosition = map.GeoToWorldPosition(location, true);
+                    spawnedObject.transform.localScale = new Vector3(spawnScale, (normalize(heightValues[i], maxHeight, minHeight) * HeightScaleMax) + HeightScaleMin, spawnScale);
+                    //postion the histogram bar above map
+                    spawnedObject.transform.localPosition = new Vector3(spawnedObject.transform.position.x, spawnedObject.transform.position.y + spawnedObject.transform.localScale.y / 2, spawnedObject.transform.position.z);
                 }
-                else
+                //once calculations are finished move plot back to its real postion
+                mapHolder.transform.position = currPos;
+                mapHolder.transform.rotation = rot;
+                mapHolder.transform.localScale = currScale;
+
+                //if the histogram bar appears outside the bounds due to zoom level hide them
+                for (int i = 0; i < count; i++)
                 {
-                    spawnedObject.SetActive(true);
+                    var spawnedObject = _spawnedObjects[i];
+                    //bounds check
+                    if (!mapHolder.GetComponent<BoxCollider>().bounds.Contains(spawnedObject.transform.position))
+                    {
+                        spawnedObject.SetActive(false);
+                    }
+                    else
+                    {
+                        spawnedObject.SetActive(true);
+                    }
                 }
             }
-            mapHolder.transform.position = currPos;
-            mapHolder.transform.rotation = rot;
-            mapHolder.transform.localScale = currScale;
-		}
+
+        }
 
         private float FindMaxValue(List<float> values)
         {

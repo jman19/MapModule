@@ -37,7 +37,7 @@ namespace DataVisualization.Plotter
         [Tooltip("The color of each histogram bar (default is white)")]
         public List<Color> colors;
         [Tooltip("changes size scale of the data points")]
-        public float spawnScale = 0.1f;
+        public float spawnScale = 0.015f;
         [Tooltip("changes max height of the bar")]
         public float HeightScaleMax = 0.95f;
         [Tooltip("changes min height of the bar")]
