@@ -12,8 +12,8 @@ namespace DataVisualization.Plotter
         [Tooltip("Latitude Longitude")]
         [Geocode]
         public string location;
-        [Tooltip("mapZoomLevel")]
-        public float zoom;
+        [Tooltip("mapZoomLevel smallest allowed is 2")]
+        public int zoom;
         [Tooltip("changes size scale of plot")]
         public float plotScale = 3;
         // Object which will contain instantiated prefabs in hiearchy
@@ -114,6 +114,11 @@ namespace DataVisualization.Plotter
         void Update()
         {
             //allows realtime zoom and location changing on map
+            //smallest allowed zoom
+            if (zoom < 2)
+            {
+                zoom = 2;
+            }
             map.GetComponent<AbstractMap>().UpdateMap(Conversions.StringToLatLon(location), zoom);
             if (enable3DTerrain)
             {

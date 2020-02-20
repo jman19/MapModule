@@ -78,6 +78,15 @@ namespace DataVisualization.Plotter
 				spawnedObject.transform.localScale = new Vector3(spawnScale, (normalize(heightValues[i], maxHeight, minHeight) * HeightScaleMax)+ HeightScaleMin, spawnScale);
                 //postion the histogram bar above map
                 spawnedObject.transform.localPosition = new Vector3(spawnedObject.transform.position.x, spawnedObject.transform.position.y+spawnedObject.transform.localScale.y/2, spawnedObject.transform.position.z);
+                //if the histogram bar appears outside the bounds due to zoom level hide them
+                if (!mapHolder.GetComponent<BoxCollider>().bounds.Contains(spawnedObject.transform.position))
+                {
+                    spawnedObject.SetActive(false);
+                }
+                else
+                {
+                    spawnedObject.SetActive(true);
+                }
             }
             mapHolder.transform.position = currPos;
             mapHolder.transform.rotation = rot;
