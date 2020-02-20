@@ -9,6 +9,7 @@ namespace DataVisualization.Plotter
     public class mrMap : MonoBehaviour
     {
         [Tooltip("Latitude Longitude")]
+        [Geocode]
         public string location;
         [Tooltip("mapZoomLevel")]
         public float zoom;

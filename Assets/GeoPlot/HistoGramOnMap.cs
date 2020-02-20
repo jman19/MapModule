@@ -42,7 +42,7 @@ namespace DataVisualization.Plotter
 				_locations[i] = Conversions.StringToLatLon(locationString);
                 var instance = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 instance.transform.localScale = new Vector3(spawnScale, (normalize(heightValues[i],maxHeight,minHeight)* HeightScaleMax)+ HeightScaleMin, spawnScale);
-                instance.transform.parent = gameObject.transform;
+                instance.transform.parent = gameObject.transform.parent;
                 instance.transform.localPosition = map.GeoToWorldPosition(_locations[i], true);
 				_spawnedObjects.Add(instance);
 			}
@@ -50,13 +50,14 @@ namespace DataVisualization.Plotter
 
 		private void Update()
 		{
-            float currX = gameObject.transform.position.x;
-            float currY= gameObject.transform.position.y;
-            float currZ = gameObject.transform.position.z;
-            Quaternion rot = gameObject.transform.rotation;
+            GameObject mapHolder = gameObject.transform.parent.gameObject;
+            Vector3 currPos = mapHolder.transform.position;
+            Vector3 currScale = mapHolder.transform.localScale;
+            Quaternion rot = mapHolder.transform.rotation;
 
-            map.transform.position=new Vector3(0, 0, 0);
-            map.transform.rotation = Quaternion.identity;
+            mapHolder.transform.position=new Vector3(0, 0, 0);
+            mapHolder.transform.localScale = new Vector3(1, 1, 1);
+            mapHolder.transform.rotation = Quaternion.identity;
             int count = _spawnedObjects.Count;
 			for (int i = 0; i < count; i++)
 			{
@@ -67,8 +68,9 @@ namespace DataVisualization.Plotter
                 //postion the histogram bar above map
                 spawnedObject.transform.localPosition = new Vector3(spawnedObject.transform.position.x, spawnedObject.transform.position.y+spawnedObject.transform.localScale.y/2, spawnedObject.transform.position.z);
             }
-            map.transform.position = new Vector3(currX, currY, currZ);
-            map.transform.rotation = rot;
+            mapHolder.transform.position = currPos;
+            mapHolder.transform.rotation = rot;
+            mapHolder.transform.localScale = currScale;
 		}
 
         private float FindMaxValue(List<float> values)
